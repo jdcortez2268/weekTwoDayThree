@@ -1,0 +1,64 @@
+1.How many copies of the book titled The Lost Tribe are owned by the library branch whose name is "Sharpstown"?
+
+select noOfCopies
+from ((tbl_book_copies tbc
+inner join tbl_book tb on tbc.bookId = tb.bookId)
+inner join tbl_library_branch tlb on tbc.branchId = tlb.branchId)
+where tb.title = 'The Lost Tribe' and tlb.branchName = 'Sharpstown';
+
+2.	How many copies of the book titled The Lost Tribe are owned by each library branch?
+
+select SUM(noOfCopies) numberCopies
+from ((tbl_book_copies tbc
+inner join tbl_book tb on tbc.bookId = tb.bookId)
+inner join tbl_library_branch tlb on tbc.branchId = tlb.branchId)
+where tb.title = 'The Lost Tribe';
+
+3.	Retrieve the names of all borrowers who do not have any books checked out.
+
+select name
+from(
+select name, tbl.cardNo
+from tbl_borrower tb
+left join tbl_book_loans tbl
+on tb.cardNo = tbl.cardNo) tbl_result
+where cardNo is null;
+
+
+4.	For each book that is loaned out from the "Sharpstown" branch and whose DueDate is today, retrieve the book title, the borrower's name, and the borrower's address.
+
+select title, tbl_borrower.name, tbl_borrower.address
+from (((tbl_book_loans 
+inner join tbl_library_branch on tbl_book_loans.branchId = tbl_library_branch.branchId)
+inner join tbl_borrower  on tbl_book_loans.cardNo = tbl_borrower.cardNo)
+inner join tbl_book on tbl_book_loans.bookId = tbl_book.bookId)
+where tbl_library_branch.branchName = 'Sharpstown' and date(now()) = date(dueDate);
+
+
+5.	For each library branch, retrieve the branch name and the total number of books loaned out from that branch.
+
+select branchName, count(branchName) numberBooks
+from (tbl_book_loans tbl
+inner join tbl_library_branch tlb on tbl.branchId = tlb.branchId)
+group by branchName;
+
+
+6.	Retrieve the names, addresses, and number of books checked out for all borrowers who have more than five books checked out. 
+
+select name , numBooks
+from 
+(select name, address, count(name) numBooks
+from tbl_book_loans tbl
+inner join tbl_borrower tb on tbl.cardNo = tb.cardNo
+group by name) resultTable
+where numBooks >5;
+
+7.	 For each book authored (or co-authored) by "Stephen King", retrieve the title and the number of copies owned by the library branch whose name is "Central"
+
+select title, noOfCopies
+from ((((tbl_book_authors tba
+inner join tbl_author ta on tba.authorId = ta.authorId)
+inner join tbl_book tb  on tba.bookId = tb.bookId)
+inner join tbl_book_copies tbc on tb.bookId = tbc.bookId)
+inner join tbl_library_branch tlb on tbc.branchId = tlb.branchId)
+where authorName = 'Stephen King' and branchName = 'Central';
